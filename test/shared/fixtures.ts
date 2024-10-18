@@ -1,5 +1,5 @@
 import { Wallet, Contract } from 'ethers'
-import { Web3Provider } from 'ethers/providers'
+import { JsonRpcProvider } from 'ethers/providers'
 import { deployContract } from 'ethereum-waffle'
 
 import { expandTo18Decimals } from './utilities'
@@ -15,6 +15,21 @@ import UniswapV2Router01 from '../../build/UniswapV2Router01.json'
 import UniswapV2Migrator from '../../build/UniswapV2Migrator.json'
 import UniswapV2Router02 from '../../build/UniswapV2Router02.json'
 import RouterEventEmitter from '../../build/RouterEventEmitter.json'
+
+export const NETWORK = process.env.NETWORK ?? "";
+console.log(`network:`, NETWORK);
+
+export const RPC_URL = 
+  NETWORK === "proxy" ? "http://proxy:9090" :
+  NETWORK === "proxy2" ? "http://proxy2:9090" :
+  NETWORK === "op-geth"  ? "http://geth:8545" :
+  NETWORK === "op-geth2"  ? "http://geth2:8546" :
+  NETWORK === "local-op-geth" ? "http://localhost:8545" : "";
+console.log(`rpc_url:`, RPC_URL);
+
+export const CHAIN_ID = Number(process.env.CHAIN_ID);
+console.log(`chain id:`, CHAIN_ID);
+
 
 const overrides = {
   gasLimit: 9999999
@@ -37,7 +52,7 @@ interface V2Fixture {
   WETHPair: Contract
 }
 
-export async function v2Fixture(provider: Web3Provider, [wallet]: Wallet[]): Promise<V2Fixture> {
+export async function v2Fixture(provider: JsonRpcProvider, [wallet]: Wallet[]): Promise<V2Fixture> {
   // deploy tokens
   const tokenA = await deployContract(wallet, ERC20, [expandTo18Decimals(10000)])
   const tokenB = await deployContract(wallet, ERC20, [expandTo18Decimals(10000)])

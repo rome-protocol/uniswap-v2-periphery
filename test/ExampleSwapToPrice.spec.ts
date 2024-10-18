@@ -2,7 +2,10 @@ import chai, { expect } from 'chai'
 import { Contract } from 'ethers'
 import { MaxUint256 } from 'ethers/constants'
 import { BigNumber, bigNumberify, defaultAbiCoder, formatEther } from 'ethers/utils'
-import { solidity, MockProvider, createFixtureLoader, deployContract } from 'ethereum-waffle'
+import { solidity, deployContract } from 'ethereum-waffle'
+import { JsonRpcProvider } from 'ethers/providers'
+import { Wallet } from 'ethers'
+import { NETWORK, RPC_URL, CHAIN_ID } from './shared/fixtures'
 
 import { expandTo18Decimals } from './shared/utilities'
 import { v2Fixture } from './shared/fixtures'
@@ -16,13 +19,8 @@ const overrides = {
 }
 
 describe('ExampleSwapToPrice', () => {
-  const provider = new MockProvider({
-    hardfork: 'istanbul',
-    mnemonic: 'horn horn horn horn horn horn horn horn horn horn horn horn',
-    gasLimit: 9999999
-  })
-  const [wallet] = provider.getWallets()
-  const loadFixture = createFixtureLoader(provider, [wallet])
+  const provider = new JsonRpcProvider(RPC_URL, { name: NETWORK, chainId: CHAIN_ID })
+  const wallet = new Wallet("0x97274c00fe8f93f3db107a4a10020d30b9b36f88021daff0e469967087178508", provider)
 
   let token0: Contract
   let token1: Contract
@@ -30,7 +28,7 @@ describe('ExampleSwapToPrice', () => {
   let swapToPriceExample: Contract
   let router: Contract
   beforeEach(async function() {
-    const fixture = await loadFixture(v2Fixture)
+    const fixture = await v2Fixture(provider, [wallet])
     token0 = fixture.token0
     token1 = fixture.token1
     pair = fixture.pair
